@@ -204,7 +204,7 @@ void mygets(char *buff, unsigned int length)
     sptr = &getsbuf[2];
     if (*sptr==0x1a)
         {
-        /* puts(""); */ /* WHY ??? */
+        puts("");
         exit(10);
         } /* end if. */
 
@@ -216,6 +216,7 @@ void mygets(char *buff, unsigned int length)
         } /* end for. */
 
     *buff='\0';
+    puts("");
 
 } /* end mygets. */
 
@@ -716,7 +717,7 @@ int main(int argc, char *argv[])
         {
         do
             {
-	    myprintf("\nDelete current volume label (Y/N)? ",0);
+	    myprintf("Delete current volume label (Y/N)? ",0);
             mygets(ans,2); /* WHY not use getch? ??? */
             } /* end do. */
         while (((*ans=(char)toupper(*ans)) != 'Y') && (*ans != 'N'));
