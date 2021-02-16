@@ -624,12 +624,7 @@ int check_quotes()
     intdos(&regs, &regs);
 
     /* Get address of original command line. */
-#ifdef __TURBOC__
     psp = MK_FP(regs.x.bx, 0x81);
-#else
-    FP_OFF(psp) = 0x81;
-    FP_SEG(psp) = regs.x.bx;
-#endif
 
     /* Check for double quotes. */
     for (;*psp != '\r';psp++)
