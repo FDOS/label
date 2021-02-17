@@ -11,7 +11,7 @@ UPX=upx --8086
 #   or
 #     --best for smallest
 
-label.exe: label.c
+label.exe: prf.c label.c
 	$(CC) $(CFLAGS)$@ $^ $(LDFLAGS)
 	$(UPX) $@
 

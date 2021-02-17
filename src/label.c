@@ -39,6 +39,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if 1
+int Xprintf(const char * fmt, ...);
+int Xsprintf(char *, const char * fmt, ...);
+#define PRINTF Xprintf
+#define SPRINTF Xsprintf
+#else
+#include <stdio.h>
+#define PRINTF printf
+#define SPRINTF sprintf
+#endif
+
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
 #define VERSION          "1.4b" /* Added the VERSION definition...BER */
@@ -78,9 +89,7 @@ char creat_fcb[44] = {0xff, 0, 0, 0, 0, 0, 0x8, 0,
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
 int classify_args(int, char *[], char *[], char *[]);
-void myprintf(char [], int);
 void mygets(char *, unsigned int);
-void hexprint(char);
 #ifdef __TURBOC__
 void interrupt ctrlc_hndlr(void);
 #else
@@ -152,23 +161,6 @@ void SetCurDir(char *dir)
 
 /* /////////////////////////////////////////////////////////////////////// */
 
-void myprintf(char string[], int len)
-{
-    union REGS regs;
-
-    if (!len)
-        len = strlen(string);
-
-    regs.h.ah = 0x40;
-    regs.x.bx = 1;
-    regs.x.cx = len;
-    regs.x.dx = (unsigned)string; /* needs NEAR POINTER */
-    intdos(&regs,&regs);
-
-} /* end myprintf. */
-
-/* /////////////////////////////////////////////////////////////////////// */
-
 void mygets(char *buff, unsigned int length)
 {
     char *sptr;
@@ -205,7 +197,7 @@ void mygets(char *buff, unsigned int length)
     regs.x.dx = (unsigned) getsbuf;
     regs.h.ah = 0xa;
     intdos(&regs,&regs);
-    myprintf("\r",0); /* puts("\r"); */
+    PRINTF("\n"); /* puts("\r"); */
     sptr = &getsbuf[2];
     if (*sptr==0x1a)
         {
@@ -223,30 +215,6 @@ void mygets(char *buff, unsigned int length)
     *buff='\0';
 
 } /* end mygets. */
-
-/* /////////////////////////////////////////////////////////////////////// */
-
-void hexprint(char c)
-{
-    unsigned char temp;
-
-    temp = c;                           /* Print hi. */
-    temp = temp>>4;
-    if (temp<10)
-        temp += '0';
-    else
-        temp += ('A'-10);
-
-    myprintf(&temp,1); /* printf(&temp); */
-    temp = c & 0xf;                     /* Print lo. */
-    if (temp<10)
-        temp += '0';
-    else
-        temp += ('A'-10);
-
-    myprintf(&temp,1); /* printf(&temp) */
-
-} /* end hexprint. */
 
 /* /////////////////////////////////////////////////////////////////////// */
 
@@ -281,8 +249,7 @@ int valid_drive(char *s)
     intdos(&regs, &regs);
     if (regs.h.al)
         {
-        myprintf("Not a valid drive\r\n",0);
-        /* printf("Not a valid drive\n") */
+        PRINTF("Not a valid drive\n");
         exit(1);
         } /* end if. */
 
@@ -297,8 +264,7 @@ int valid_drive(char *s)
     intdos(&regs, &regs);
     if (regs.x.dx & 0x1000)
         {
-        myprintf("You cannot label a network drive\r\n",0);
-        /* printf("You cannot label a network drive\n"); */
+        PRINTF("You cannot label a network drive\n");
         exit(5);
         } /* end if. */
 
@@ -313,8 +279,8 @@ int valid_drive(char *s)
     intdosx(&regs, &regs, &sregs);
     if (*buf1 != *buf2)
         {
-        myprintf("You cannot label a drive which has\r\n",0);
-        myprintf("been ASSIGNed, JOINed, or SUBSTed.\r\n",0);
+        PRINTF("You cannot label a drive which has\n"
+               "been ASSIGNed, JOINed, or SUBSTed.\n");
         exit(5);
         } /* end if. */
 
@@ -347,7 +313,7 @@ void get_label()
 
     do
         {
-        myprintf("Volume label (11 characters, ENTER for none)? ",0);
+        PRINTF("Volume label (11 characters, ENTER for none)? ");
         mygets(temp,MAX_LABEL_LENGTH+1);
         } /* end do. */
     while (check_label(temp));
@@ -359,7 +325,21 @@ void get_label()
 
 void disp_label()
 {
-    unsigned char serialbuf[26];
+/*
+Offset  Size    Description     (Table 01766)
+00h    WORD    0000h (info level)
+02h    DWORD   disk serial number (binary)
+06h 11 BYTEs   volume label or "NO NAME    " if none present
+11h  8 BYTEs   (AL=00h only) filesystem type (see #01767)
+*/
+    struct {
+      short int level;
+      unsigned short int lo_serno;
+      unsigned short int hi_serno;
+      char label[11];
+      char fstype[8];
+    } dinfo;
+
     union REGS regs;
     struct SREGS sregs;
 
@@ -375,36 +355,24 @@ void disp_label()
     intdos(&regs, &regs);
     if (regs.h.al)
         {
-        myprintf("Volume in drive ",0);
-        myprintf(Drive,1);
-        myprintf(" has no label\r\n",0);
+        PRINTF("Volume in drive %c has no label\n", *Drive);
         } /* end if. */
     else
         {
         NoLabel = 0;
         fcb[ENDNAME] = '\0';
-        myprintf("Volume in drive ",0);
-        myprintf(Drive,1);
-        myprintf(" is ",0);
-        myprintf(&fcb[NAME],0);
-        myprintf("\r\n",0);
+        PRINTF("Volume in drive %c is %s\n", *Drive, &fcb[NAME]);
         } /* end else. */
 
     /* Now print out the volume serial number, if it exists. */
     segread(&sregs);
     regs.x.ax = 0x6900;
     regs.h.bl = *Drive-'A'+1;
-    regs.x.dx = (unsigned)serialbuf; /* needs NEAR POINTER */
+    regs.x.dx = (unsigned)&dinfo; /* needs NEAR POINTER */
     intdosx(&regs, &regs, &sregs);
     if (!regs.x.cflag)
         {
-        myprintf("Volume serial number is ",0);
-        hexprint(serialbuf[5]);
-        hexprint(serialbuf[4]);
-        myprintf("-",0);
-        hexprint(serialbuf[3]);
-        hexprint(serialbuf[2]);
-        myprintf("\r\n",0);
+        PRINTF("Volume serial number is %04X-%04X\n", dinfo.hi_serno, dinfo.lo_serno);
         } /* end if. */
 
 } /* end disp_label. */
@@ -446,7 +414,7 @@ void save_label(char *string)
         {
         if (DriveNotFirst)
             {
-            myprintf("Invalid drive\r\n",0);
+            PRINTF("Invalid drive\n");
             exit(4);
             } /* end if. */
         else
@@ -512,8 +480,8 @@ int check_label(char *s)
         ((LabelLen > 0) && ((length + LabelLen + 1) > MAX_LABEL_LENGTH)))
         {
         strcpy(Label,"");
-        myprintf("The label is too long.  The label must\r\n",0);
-        myprintf("be 11 characters or less.\r\n",0);
+        PRINTF("The label is too long.  The label must\n"
+               "be 11 characters or less.\n");
         return (2);
         } /* end if. */
 
@@ -525,7 +493,7 @@ int check_label(char *s)
             if (s[i]==bad_chars[j])
                 {
                 strcpy(Label,"");
-                myprintf("Invalid volume label\r\n",0);
+                PRINTF("Invalid volume label\n");
                 return(4);
                 } /* end if. */
 
@@ -534,7 +502,7 @@ int check_label(char *s)
         if ((unsigned char)s[i]<(unsigned char)SPACEBAR)
             {
             strcpy(Label,"");
-            myprintf("Invalid volume label\r\n",0);
+            PRINTF("Invalid volume label\n");
             return(4);
             } /* end if. */
 
@@ -577,8 +545,8 @@ void do_cmdline(int ac, char *av[])
                 } /* end if. */
             else
                 {
-                myprintf("There were multiple drives mentioned.\r\n",0);
-                myprintf("Please select one drive to label at a time.\r\n",0);
+                PRINTF("There were multiple drives mentioned.\n"
+                       "Please select one drive to label at a time.\n");
                 exit(26);
                 } /* end if. */
       
@@ -606,7 +574,7 @@ void do_cmdline(int ac, char *av[])
     if (check_quotes())
         {
         strcpy(Label,"");
-        myprintf("Invalid label\r\n",0);
+        PRINTF("Invalid label\n");
         return;
         } /* end if. */
 
@@ -671,9 +639,7 @@ int main(int argc, char *argv[])
         if (optargs[index][0] == '?') help_flag=1;
         else
             {
-            myprintf("Invalid parameter - /",0);
-            myprintf(optargs[index],0); /* removed strupr */
-            myprintf("\r\n",0);
+            PRINTF("Invalid parameter - /%c\n", optargs[index][0]);
             exit(1);
             } /* end else. */
 
@@ -681,13 +647,13 @@ int main(int argc, char *argv[])
 
     if (help_flag)
         {
-        myprintf("\r\nLABEL Version " VERSION "\r\n", 0);
-        myprintf("Creates, changes or deletes the volume label of a disk.\r\n",0);
-        myprintf("\r\n",0);
-        myprintf("Syntax: LABEL [drive:][label] [/?]\r\n",0);
-        myprintf("  [drive:]  Specifies which drive you want to label\r\n",0);
-        myprintf("  [label]   Specifies the new label you want to label the drive\r\n",0);
-        myprintf("  /?        Displays this help message\r\n",0);
+        PRINTF("\nLABEL Version %s\n", VERSION);
+        PRINTF("Creates, changes or deletes the volume label of a disk.\n");
+        PRINTF("\n");
+        PRINTF("Syntax: LABEL [drive:][label] [/?]\n");
+        PRINTF("  [drive:]  Specifies which drive you want to label\n");
+        PRINTF("  [label]   Specifies the new label you want to label the drive\n");
+        PRINTF("  /?        Displays this help message\n");
         return 0;
         } /* end if. */
 
@@ -716,7 +682,7 @@ int main(int argc, char *argv[])
         {
         do
             {
-	    myprintf("\nDelete current volume label (Y/N)? ",0);
+	    PRINTF("\nDelete current volume label (Y/N)? ");
             mygets(ans,2); /* WHY not use getch? ??? */
             } /* end do. */
         while (((*ans=(char)toupper(*ans)) != 'Y') && (*ans != 'N'));
