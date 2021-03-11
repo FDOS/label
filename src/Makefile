@@ -11,11 +11,18 @@ UPX=upx --8086
 #   or
 #     --best for smallest
 
-label.exe: prf.c label.c
+ifneq ($(findstring NOCATS,$(CFLAGS)),)
+	KITTEN:=
+else
+	KITTEN:=../kitten/kitten.c
+endif
+
+label.exe _label.exe: prf.c label.c $(KITTEN)
 	$(CC) $(CFLAGS)$@ $^ $(LDFLAGS)
 	$(UPX) $@
 
 clean:
 	$(RM) label.exe
+	$(RM) _label.exe
 	$(RM) *.o
 	$(RM) *.obj

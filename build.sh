@@ -35,4 +35,8 @@ else
   exit 1
 fi
 
+# if you want to build without kitten uncomment the following
+# export CFLAGS="-DNOCATS ${CFLAGS}"
+# TARGET=_${TARGET}
+
 make -C src ${TARGET}

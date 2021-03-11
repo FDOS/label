@@ -33,10 +33,16 @@ rem # makes no real difference here, but compact saves a few bytes in size.
 set CC=tcc
 set EXEFLAGS=-mt -Z -O -k-
 set CFLAGS=-w -M -f- -a- -K -ln %EXEFLAGS% -e
+rem tcc looks for includes from the current directory, not the location of the
+rem file that's trying to include them, so add kitten's location
+set CFLAGS=-I../kitten %CFLAGS%
 set TARGET=label.exe
 goto doit
 
 :doit
+rem # if you want to build without kitten uncomment the following
+rem set CFLAGS=-DNOCATS %CFLAGS%
+rem set TARGET=_%TARGET%
 
 rem We use GNU make for all targets
 make -C src %TARGET%
