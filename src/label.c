@@ -303,7 +303,7 @@ void GetDrive()
     Drive[0] = 'A' + driveno;
 #else
     _dos_getdrive(&driveno);
-    Drive[0] = (char) driveno + 'A' - 1;
+    Drive[0] = 'A' + driveno - 1;
 #endif
     valid_drive(Drive);
 
