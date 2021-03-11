@@ -39,6 +39,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../kitten/kitten.h"
+
 #if 1
 int Xprintf(const char * fmt, ...);
 int Xsprintf(char *, const char * fmt, ...);
@@ -85,6 +87,8 @@ char con_fcb[44] =   {0xff, 0, 0, 0, 0, 0, 0, 0,
   'C', 'O', 'N',' ',' ',' ',' ',' ',' ',' ',' '};
 char creat_fcb[44] = {0xff, 0, 0, 0, 0, 0, 0x8, 0,
   ' ', ' ', ' ',' ',' ',' ',' ',' ',' ',' ',' '};
+
+nl_catd cat;    /* handle for localized messages (catalog) */
 
 /* P R O T O T Y P E S /////////////////////////////////////////////////// */
 
@@ -249,7 +253,7 @@ int valid_drive(char *s)
     intdos(&regs, &regs);
     if (regs.h.al)
         {
-        PRINTF("Not a valid drive\n");
+        PRINTF(catgets(cat, 2, 5, "Not a valid drive\n"));
         exit(1);
         } /* end if. */
 
@@ -264,7 +268,7 @@ int valid_drive(char *s)
     intdos(&regs, &regs);
     if (regs.x.dx & 0x1000)
         {
-        PRINTF("You cannot label a network drive\n");
+        PRINTF(catgets(cat, 2, 6, "You cannot label a network drive\n"));
         exit(5);
         } /* end if. */
 
@@ -279,8 +283,8 @@ int valid_drive(char *s)
     intdosx(&regs, &regs, &sregs);
     if (*buf1 != *buf2)
         {
-        PRINTF("You cannot label a drive which has\n"
-               "been ASSIGNed, JOINed, or SUBSTed.\n");
+        PRINTF(catgets(cat, 2, 7, "You cannot label a drive which has\n"
+                                  "been ASSIGNed, JOINed, or SUBSTed.\n"));
         exit(5);
         } /* end if. */
 
@@ -313,7 +317,7 @@ void get_label()
 
     do
         {
-        PRINTF("Volume label (11 characters, ENTER for none)? ");
+        PRINTF(catgets(cat, 1, 1, "Volume label (11 characters, ENTER for none)? "));
         mygets(temp,MAX_LABEL_LENGTH+1);
         } /* end do. */
     while (check_label(temp));
@@ -355,13 +359,13 @@ Offset  Size    Description     (Table 01766)
     intdos(&regs, &regs);
     if (regs.h.al)
         {
-        PRINTF("Volume in drive %c has no label\n", *Drive);
+        PRINTF(catgets(cat, 1, 2, "Volume in drive %c has no label\n"), *Drive);
         } /* end if. */
     else
         {
         NoLabel = 0;
         fcb[ENDNAME] = '\0';
-        PRINTF("Volume in drive %c is %s\n", *Drive, &fcb[NAME]);
+        PRINTF(catgets(cat, 1, 3, "Volume in drive %c is %s\n"), *Drive, &fcb[NAME]);
         } /* end else. */
 
     /* Now print out the volume serial number, if it exists. */
@@ -372,7 +376,7 @@ Offset  Size    Description     (Table 01766)
     intdosx(&regs, &regs, &sregs);
     if (!regs.x.cflag)
         {
-        PRINTF("Volume serial number is %04X-%04X\n", dinfo.hi_serno, dinfo.lo_serno);
+        PRINTF(catgets(cat, 1, 4, "Volume serial number is %04X-%04X\n"), dinfo.hi_serno, dinfo.lo_serno);
         } /* end if. */
 
 } /* end disp_label. */
@@ -414,7 +418,7 @@ void save_label(char *string)
         {
         if (DriveNotFirst)
             {
-            PRINTF("Invalid drive\n");
+            PRINTF(catgets(cat, 2, 8, "Invalid drive\n"));
             exit(4);
             } /* end if. */
         else
@@ -480,8 +484,8 @@ int check_label(char *s)
         ((LabelLen > 0) && ((length + LabelLen + 1) > MAX_LABEL_LENGTH)))
         {
         strcpy(Label,"");
-        PRINTF("The label is too long.  The label must\n"
-               "be 11 characters or less.\n");
+        PRINTF(catgets(cat, 2, 1, "The label is too long. The label must\n"
+                                  "be 11 characters or less.\n"));
         return (2);
         } /* end if. */
 
@@ -493,7 +497,7 @@ int check_label(char *s)
             if (s[i]==bad_chars[j])
                 {
                 strcpy(Label,"");
-                PRINTF("Invalid volume label\n");
+                PRINTF(catgets(cat, 2, 2, "Invalid volume label\n"));
                 return(4);
                 } /* end if. */
 
@@ -502,7 +506,7 @@ int check_label(char *s)
         if ((unsigned char)s[i]<(unsigned char)SPACEBAR)
             {
             strcpy(Label,"");
-            PRINTF("Invalid volume label\n");
+            PRINTF(catgets(cat, 2, 2, "Invalid volume label\n"));
             return(4);
             } /* end if. */
 
@@ -545,8 +549,8 @@ void do_cmdline(int ac, char *av[])
                 } /* end if. */
             else
                 {
-                PRINTF("There were multiple drives mentioned.\n"
-                       "Please select one drive to label at a time.\n");
+                PRINTF(catgets(cat, 2, 3, "There were multiple drives mentioned.\n"
+                                          "Please select one drive to label at a time.\n"));
                 exit(26);
                 } /* end if. */
       
@@ -574,7 +578,7 @@ void do_cmdline(int ac, char *av[])
     if (check_quotes())
         {
         strcpy(Label,"");
-        PRINTF("Invalid label\n");
+        PRINTF(catgets(cat, 2, 4, "Invalid label\n"));
         return;
         } /* end if. */
 
@@ -614,6 +618,8 @@ void on_exit()
     if (curdir[0] != 0)            /* Originally at root? */
         SetCurDir(curdir);        /* Change to original dir. */
 
+    catclose(cat);
+
 } /* end on_exit. */
 
 /* /////////////////////////////////////////////////////////////////////// */
@@ -627,6 +633,8 @@ int main(int argc, char *argv[])
     int index;
     int help_flag = 0;
 
+    cat = catopen("label", 0);
+
 #ifdef __TURBOC__
     setvect(0x23, ctrlc_hndlr);
 #else
@@ -636,10 +644,11 @@ int main(int argc, char *argv[])
     n_options = classify_args(argc, argv, fileargs, optargs);
     for (index=0;index<n_options;index++)
         {
-        if (optargs[index][0] == '?') help_flag=1;
+        if (optargs[index][0] == '?')
+            help_flag=1;
         else
             {
-            PRINTF("Invalid parameter - /%c\n", optargs[index][0]);
+            PRINTF(catgets(cat, 2, 0, "Invalid parameter - /%c\n"), optargs[index][0]);
             exit(1);
             } /* end else. */
 
@@ -647,13 +656,14 @@ int main(int argc, char *argv[])
 
     if (help_flag)
         {
-        PRINTF("\nLABEL Version %s\n", VERSION);
-        PRINTF("Creates, changes or deletes the volume label of a disk.\n");
         PRINTF("\n");
-        PRINTF("Syntax: LABEL [drive:][label] [/?]\n");
-        PRINTF("  [drive:]  Specifies which drive you want to label\n");
-        PRINTF("  [label]   Specifies the new label you want to label the drive\n");
-        PRINTF("  /?        Displays this help message\n");
+        PRINTF(catgets(cat, 0, 0, "LABEL Version %s\n"), VERSION);
+        PRINTF(catgets(cat, 0, 1, "Creates, changes or deletes the volume label of a disk.\n"));
+        PRINTF("\n");
+        PRINTF(catgets(cat, 0, 2, "Syntax: LABEL [drive:][label] [/?]\n"));
+        PRINTF(catgets(cat, 0, 3, "  [drive:]  Specifies which drive you want to label\n"));
+        PRINTF(catgets(cat, 0, 4, "  [label]   Specifies the new label you want to label the drive\n"));
+        PRINTF(catgets(cat, 0, 5, "  /?        Displays this help message\n"));
         return 0;
         } /* end if. */
 
@@ -682,7 +692,8 @@ int main(int argc, char *argv[])
         {
         do
             {
-	    PRINTF("\nDelete current volume label (Y/N)? ");
+            PRINTF("\n");
+            PRINTF(catgets(cat, 1, 0, "Delete current volume label (Y/N)? "));
             mygets(ans,2); /* WHY not use getch? ??? */
             } /* end do. */
         while (((*ans=(char)toupper(*ans)) != 'Y') && (*ans != 'N'));
