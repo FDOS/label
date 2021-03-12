@@ -22,6 +22,11 @@
 
 */
 
+/* Many DOS functions are called with only the pointer offset set */
+#if !defined(__TINY__) && !defined(__SMALL__)
+#error Must be compiled with the TINY or SMALL model.
+#endif
+
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
 #include <io.h>
