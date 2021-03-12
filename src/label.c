@@ -468,6 +468,7 @@ int check_label(char *s)
     int length,LabelLen;
     int i,j;
     char * sup;
+    char *msg;
 
     /* s = strupr(s); */
     sup = s;
@@ -489,6 +490,8 @@ int check_label(char *s)
         return (2);
         } /* end if. */
 
+    msg = "Invalid volume label\n";
+
     /* Make sure all characters are legitimate. */
     for (i=0;i<length;i++)
         {
@@ -497,7 +500,7 @@ int check_label(char *s)
             if (s[i]==bad_chars[j])
                 {
                 strcpy(Label,"");
-                PRINTF(catgets(cat, 2, 2, "Invalid volume label\n"));
+                PRINTF(catgets(cat, 2, 2, msg));
                 return(4);
                 } /* end if. */
 
@@ -506,7 +509,7 @@ int check_label(char *s)
         if ((unsigned char)s[i]<(unsigned char)SPACEBAR)
             {
             strcpy(Label,"");
-            PRINTF(catgets(cat, 2, 2, "Invalid volume label\n"));
+            PRINTF(catgets(cat, 2, 2, msg));
             return(4);
             } /* end if. */
 
