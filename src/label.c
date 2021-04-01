@@ -29,7 +29,6 @@
 
 /* I N C L U D E S /////////////////////////////////////////////////////// */
 
-#include <io.h>
 #include <dos.h>
 #ifdef __TURBOC__
 #include <dir.h>   /* findfirst, getdisk, setdisk, some constants */
@@ -97,7 +96,7 @@ void mygets(char *, unsigned int);
 #ifdef __TURBOC__
 void interrupt ctrlc_hndlr(void);
 #else
-void far _interrupt ctrlc_hndlr(void);
+void __far __interrupt ctrlc_hndlr(void);
 #endif
 int valid_drive(char *);
 void GetDrive(void);
@@ -110,7 +109,7 @@ int check_label(char *);
 int valid_label(char *);
 void do_cmdline(int, char *[]);
 int check_quotes(void);
-void on_exit(void);
+void on_exit_hook(void);
 
 /* F U N C T I O N S ///////////////////////////////////////////////////// */
 
@@ -225,7 +224,7 @@ void mygets(char *buff, unsigned int length)
 #ifdef __TURBOC__
 void interrupt ctrlc_hndlr()
 #else
-void far _interrupt ctrlc_hndlr()
+void __far __interrupt ctrlc_hndlr()
 #endif
 {
     exit(0); /* we can ignore the Turbo C suggestion for interrupt, */
@@ -592,7 +591,11 @@ void do_cmdline(int ac, char *av[])
 int check_quotes()
 {
     union REGS regs;
-    static unsigned char far *psp;
+#ifdef __TURBOC__
+    unsigned char far *psp;
+#else
+    unsigned char __far *psp;
+#endif
 
     /* Get the segment address of PSP. */
     regs.x.ax = 0x6200;
@@ -615,7 +618,7 @@ int check_quotes()
 
 /* /////////////////////////////////////////////////////////////////////// */
 
-void on_exit()
+void on_exit_hook()
 {
 
     if (curdir[0] != 0)            /* Originally at root? */
@@ -643,7 +646,7 @@ int main(int argc, char *argv[])
 #else
     _dos_setvect(0x23, ctrlc_hndlr);
 #endif
-    atexit(on_exit);
+    atexit(on_exit_hook);
     n_options = classify_args(argc, argv, fileargs, optargs);
     for (index=0;index<n_options;index++)
         {
