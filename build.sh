@@ -3,7 +3,7 @@
 if [ x"${COMPILER}" = "xgcc" ] ; then
   # Note requires installation of libi86-ia16-elf DOS compat library
   export CC="ia16-elf-gcc"
-  export CFLAGS="-Wall -fpack-struct -mcmodel=tiny -o "
+  export CFLAGS="-Wall -fpack-struct -mcmodel=small -o "
   export LDFLAGS="-li86"
   TARGET="label.exe"
 
