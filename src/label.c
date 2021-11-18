@@ -53,7 +53,7 @@ int Xsprintf(char *, const char * fmt, ...);
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define VERSION          "1.4b" /* Added the VERSION definition...BER */
+#define VERSION          "1.4c" /* Added the VERSION definition...BER */
 #define BAD_CHARS        21
 #define MAX_LABEL_LENGTH 11
 #define fcbDRIVE         7

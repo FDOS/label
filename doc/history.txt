@@ -51,3 +51,8 @@ Version 1.4b    5/23/2003    Eric Auer
   The result is a much smaller LABEL.EXE, especially with help of
     http://upx.sf.net/ -> upx --8086 label.exe ...
 
+Version 1.4c   11/17/2021    Andrew Bird:
+    add support for building with gcc-ia16
+    normalize file layout
+    update translations (FR, TR, and DE)
+    add custom printf for compiler compatibility and file size

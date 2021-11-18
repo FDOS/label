@@ -1,12 +1,12 @@
 Begin3
 Title:          Label
-Version:        1.4b
-Entered-date:   23 May 2003
+Version:        1.4c
+Entered-date:   17 Nov 2021
 Description:    Sets or changes the disk volume label
 Keywords:       freedos, label
 Author:         Joe Cosentino &lt;hardmarine -at- comcast.net&gt;
-Maintained-by:  Joe Cosentino &lt;hardmarine -at- comcast.net&gt;
-Primary-site:   http://www.geocities.com/xsaintx69/freedos/
+Maintained-by:  freedos-devel@lists.sourceforge.net (maintainers)
+Primary-site:   https://github.com/FDOS/label
 Alternate-site: http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/dos/label
 Original-site:  http://www.geocities.com/xsaintx69/freedos/
 Platforms:      DOS
