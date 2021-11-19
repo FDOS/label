@@ -1,10 +1,14 @@
 /*  Label
+ */
 
-    Version 1.4b
+#define VERSION          "1.5"
+
+/*
 
     Modified by Joe Cosentino 2000,2003.
     Modified by Brian E. Reifsnyder, August 2000.
     Modified by Eric Auer 2003.
+    Modified 2021 (see history)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,7 +57,6 @@ int Xsprintf(char *, const char * fmt, ...);
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
 
-#define VERSION          "1.4c" /* Added the VERSION definition...BER */
 #define BAD_CHARS        21
 #define MAX_LABEL_LENGTH 11
 #define fcbDRIVE         7
