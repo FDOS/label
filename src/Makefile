@@ -89,6 +89,25 @@ CFLAGS?=-I../kitten -mcmodel=small  -fpack-struct -Werror -Os -fno-strict-aliasi
 endif
 
 
+ifeq ($(COMPILER),cl)
+# Microsoft compatible, Digital Mars (dmc)
+# -0s favor small code
+# -G0 generate code for 8086+
+# -Gs remove statck overflow checks
+# -Zp1 pack structures align on byte
+# -we treat all warnings as errors
+# -w4 set warning level to max
+# -nologo operate quietly
+# -Fm[map_file]  generate map file
+# -Fe{executable}  name executable file
+# -A{T,S,M,C,L,H}  memory model, -AS defaults to DOS exe, -AT to DOS com
+CC=cl
+EXEFLAGS?=-AS
+CFLAGS?=-Os -D__MSDOS__ -Zp1 -Gs -G0 -w4 -we -nologo -Fm $(EXEFLAGS) -Fe
+LDFLAGS?=
+endif
+
+
 UPX?=upx --8086
 # if you don't want to use UPX set
 #     UPX=-rem (DOS)
