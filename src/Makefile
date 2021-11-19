@@ -106,13 +106,14 @@ else
 	KITTEN:=..$(DIRSEP)kitten$(DIRSEP)kitten.c
 endif
 
-label.exe: prf.c label.c $(KITTEN)
+label.exe _label.exe: prf.c label.c $(KITTEN)
 	$(CC) $(CFLAGS)$@ $^ $(LDFLAGS)
 	-$(UPX) $@
 
 clean:
-	$(RM) label.exe
+	$(RM) *.exe
 	$(RM) *.o
 	$(RM) *.obj
 	$(RM) *.map
+	$(RM) *.err
 
