@@ -119,8 +119,12 @@ UPX?=upx --8086
 #     --best for smallest
 
 
+# if NOCATS defined in CFLAGS or NOCATS=1 passed to make don't build with CATS
 ifneq ($(findstring NOCATS,$(CFLAGS)),)
 	KITTEN:=
+else ifeq ($(NOCATS),1)
+	KITTEN:=
+	CFLAGS:=-DNOCATS $(CFLAGS)
 else
 	KITTEN:=..$(DIRSEP)kitten$(DIRSEP)kitten.c
 endif
