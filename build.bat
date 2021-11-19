@@ -24,7 +24,7 @@ rem # -fe=executable  name executable file
 rem # -m{t,s,m,c,l,h}  memory model
 
 if "%WATCOM%"=="" set WATCOM=C:\watcom
-if "%INCLUDE%"==""set INCLUDE=%WATCOM%\h
+if "%INCLUDE%"=="" set INCLUDE=%WATCOM%\h
 set COMPILER=watcom
 set EXEFLAGS=-mt
 set CFLAGS=-oas -bt=DOS -bcl=DOS -D__MSDOS__ -zp1 -s -0 -wx -we -zq -fm %EXEFLAGS% -fe=
