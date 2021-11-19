@@ -1,8 +1,8 @@
 
 all: label.exe
 
-ifndef compiler
-compiler:=watcom
+ifndef COMPILER
+COMPILER:=watcom
 endif
 
 
@@ -31,7 +31,7 @@ CP=copy
 endif
 
 
-ifeq ($(compiler),watcom)
+ifeq ($(COMPILER),watcom)
 # Watcom
 # -0 generate code for 8086+
 # -bt=DOS compile for DOS
@@ -45,12 +45,12 @@ ifeq ($(compiler),watcom)
 # -fe=executable  name executable file
 # -m{t,s,m,c,l,h}  memory model
 CC=wcl
-EXEFLAGS=-mt
-CFLAGS=-oas -bt=DOS -bcl=DOS -D__MSDOS__ -zp1 -s -0 -wx -we -zq -fm $(EXEFLAGS) -fe=
-LDFLAGS=
+EXEFLAGS?=-mt
+CFLAGS?=-oas -bt=DOS -bcl=DOS -D__MSDOS__ -zp1 -s -0 -wx -we -zq -fm $(EXEFLAGS) -fe=
+LDFLAGS?=
 endif
 
-ifeq ($(compiler),borland)
+ifeq ($(COMPILER),borland)
 # Borland
 # -w warn -M create map -f- no floating point -Z register optimize
 # -O jump optimize -k- no standard stack frome -K unsigned char
@@ -67,29 +67,29 @@ CC=bcc
 else
 CC=tcc
 endif
-EXEFLAGS=-mt -Z -O -k-
-CFLAGS=-I../kitten -w -M -f- -a- -K -ln $(EXEFLAGS) -e
-LDFLAGS=
+EXEFLAGS?=-mt -Z -O -k-
+CFLAGS?=-I../kitten -w -M -f- -a- -K -ln $(EXEFLAGS) -e
+LDFLAGS?=
 endif
 
-ifeq ($(compiler),gcc)
+ifeq ($(COMPILER),gcc)
 ifdef LINUX
 #long name version
 CC=ia16-elf-gcc
-OBJCOPY=ia16-elf-objcopy
+OBJCOPY?=ia16-elf-objcopy
 else
 #DOS short name version
 CC=i16gcc
-OBJCOPY=i16objco
+OBJCOPY?=i16objco
 endif
 #EXEFLAGS=-ffreestanding -mrtd 
-EXEFLAGS=
-LDFLAGS=-li86
-CFLAGS=-I../kitten -mcmodel=small -fleading-underscore -fno-common -fpack-struct -Wno-pointer-to-int-cast -Wno-pragmas -Werror -Os -fno-strict-aliasing -fcall-used-es -mfar-function-if-far-return-type $(EXEFLAGS) -o 
+EXEFLAGS?=
+LDFLAGS?=-li86
+CFLAGS?=-I../kitten -mcmodel=small  -fpack-struct -Werror -Os -fno-strict-aliasing $(EXEFLAGS) -o 
 endif
 
 
-UPX=upx --8086
+UPX?=upx --8086
 # if you don't want to use UPX set
 #     UPX=-rem (DOS)
 #   or
