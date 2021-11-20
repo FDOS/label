@@ -279,8 +279,10 @@ int valid_drive(char *s)
     strcpy(buf1, TempDrive);
     strcat(buf1, "\\");
     segread(&sregs);
-    regs.x.si = (unsigned)buf1; /* needs NEAR POINTER */
-    regs.x.di = (unsigned)buf2; /* needs NEAR POINTER */
+    sregs.ds = FP_SEG(buf1);
+    regs.x.si = FP_OFF(buf1);
+    sregs.es = FP_SEG(buf2);
+    regs.x.di = FP_OFF(buf2);
     regs.x.ax = 0x6000;
     intdosx(&regs, &regs, &sregs);
     if (*buf1 != *buf2)

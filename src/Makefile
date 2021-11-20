@@ -85,7 +85,7 @@ endif
 #EXEFLAGS=-ffreestanding -mrtd 
 EXEFLAGS?=
 LDFLAGS?=-li86
-CFLAGS?=-I../kitten -mcmodel=small  -fpack-struct -Werror -fno-strict-aliasing $(EXEFLAGS) -o 
+CFLAGS?=-I../kitten -mcmodel=small -fpack-struct -Werror -Os -fno-strict-aliasing $(EXEFLAGS) -o 
 endif
 
 ifeq ($(COMPILER),cl)
