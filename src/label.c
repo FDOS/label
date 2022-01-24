@@ -706,15 +706,33 @@ int main(int argc, char *argv[])
     /* delete the existing volume label. */
     if ((*Label == '\0') && (!NoLabel))
         {
+        const char *msg;
+        const char *english_msg = "Delete current volume label (Y/N)? ";
+        const char *xlat_msg;
+        char Y, N;
+        char responses[2];
+
+        xlat_msg = catgets(cat, 1, 0, english_msg);
+        if (kitten_extract_response(xlat_msg, "(/)", responses, 2)) {
+            Y = responses[0];
+            N = responses[1];
+            msg = xlat_msg;
+        } else {
+            PRINTF("Translation response letter parse error, please report\n");
+            Y = 'Y';
+            N = 'N';
+            msg = english_msg;
+        }
+
         do
             {
             PRINTF("\n");
-            PRINTF(catgets(cat, 1, 0, "Delete current volume label (Y/N)? "));
+            PRINTF(msg);
             mygets(ans,2); /* WHY not use getch? ??? */
             } /* end do. */
-        while (((*ans=(char)toupper(*ans)) != 'Y') && (*ans != 'N'));
+        while (((*ans=(char)toupper(*ans)) != Y) && (*ans != N));
     
-        if (toupper(*ans) == 'N')
+        if (toupper(*ans) == N)
             exit(1);
 
         } /* end if. */
