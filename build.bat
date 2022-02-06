@@ -27,7 +27,7 @@ if "%WATCOM%"=="" set WATCOM=C:\watcom
 if "%INCLUDE%"=="" set INCLUDE=%WATCOM%\h
 set COMPILER=watcom
 set EXEFLAGS=-mt
-set CFLAGS=-oas -bt=DOS -bcl=DOS -D__MSDOS__ -zp1 -s -0 -wx -we -zq -fm %EXEFLAGS% -fe=
+set CFLAGS=-oas -bt=DOS -bcl=DOS -D__MSDOS__ -zp1 -s -0 -wx -we -zq %EXEFLAGS% -fe=
 set TARGET=label.exe
 goto doit
 
@@ -50,7 +50,7 @@ set EXEFLAGS=-mt -Z -O -k-
 set CFLAGS=-w -M -f- -a- -K -ln %EXEFLAGS% -e
 rem tcc looks for includes from the current directory, not the location of the
 rem file that's trying to include them, so add kitten's location
-set CFLAGS=-I../kitten %CFLAGS%
+set CFLAGS=-I../kitten -I../tnyprntf %CFLAGS%
 set TARGET=label.exe
 goto doit
 

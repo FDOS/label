@@ -68,7 +68,7 @@ else
 CC=tcc
 endif
 EXEFLAGS?=-mt -Z -O -k-
-CFLAGS?=-I../kitten -w -M -f- -a- -K -ln $(EXEFLAGS) -e
+CFLAGS?=-I../kitten -I../tnyprntf -w -M -f- -a- -K -ln $(EXEFLAGS) -e
 LDFLAGS?=
 endif
 
@@ -85,7 +85,7 @@ endif
 #EXEFLAGS=-ffreestanding -mrtd 
 EXEFLAGS?=
 LDFLAGS?=-li86
-CFLAGS?=-I../kitten -mcmodel=small -fpack-struct -Werror -Os -fno-strict-aliasing $(EXEFLAGS) -o 
+CFLAGS?=-mcmodel=small -fpack-struct -Werror -Os -fno-strict-aliasing $(EXEFLAGS) -o 
 endif
 
 ifeq ($(COMPILER),cl)
@@ -128,7 +128,17 @@ else
 	KITTEN:=..$(DIRSEP)kitten$(DIRSEP)kitten.c
 endif
 
-label.exe _label.exe: prf.c label.c $(KITTEN)
+# if NOPRNTF defined in CFLAGS or NOPRNTF=1 passed to make don't build with TNYPRNTF
+ifneq ($(findstring NOPRNTF,$(CFLAGS)),)
+	TNYPRNTF:=
+else ifeq ($(NOPRNTF),1)
+	TNYPRNTF:=
+	CFLAGS:=-DNOPRNTF $(CFLAGS)
+else
+	TNYPRNTF:=..$(DIRSEP)tnyprntf$(DIRSEP)tnyprntf.c
+endif
+
+label.exe _label.exe: label.c $(KITTEN) $(TNYPRNTF)
 	$(CC) $(CFLAGS)$@ $^ $(LDFLAGS)
 	-$(UPX) $@
 
