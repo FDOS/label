@@ -44,15 +44,9 @@
 
 #include "../kitten/kitten.h"
 
-#if 1
-int Xprintf(const char * fmt, ...);
-int Xsprintf(char *, const char * fmt, ...);
-#define PRINTF Xprintf
-#define SPRINTF Xsprintf
-#else
+#include "../tnyprntf/tnyprntf.h"
+#ifdef NOPRNTF
 #include <stdio.h>
-#define PRINTF printf
-#define SPRINTF sprintf
 #endif
 
 /* D E F I N E S ///////////////////////////////////////////////////////// */
