@@ -708,8 +708,9 @@ int main(int argc, char *argv[])
         {
         const char *msg;
         const char *english_msg = "Delete current volume label (Y/N)? ";
-        const char *xlat_msg;
         char Y, N;
+#ifndef NOCATS
+        const char *xlat_msg;
         char responses[2];
 
         xlat_msg = catgets(cat, 1, 0, english_msg);
@@ -719,6 +720,9 @@ int main(int argc, char *argv[])
             msg = xlat_msg;
         } else {
             PRINTF("Translation response letter parse error, please report\n");
+#else
+        {
+#endif
             Y = 'Y';
             N = 'N';
             msg = english_msg;
