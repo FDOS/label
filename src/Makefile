@@ -1,5 +1,5 @@
 
-all: label.exe
+all: label.exe _label.exe
 
 ifndef COMPILER
 COMPILER:=watcom
@@ -138,8 +138,12 @@ else
 	TNYPRNTF:=..$(DIRSEP)tnyprntf$(DIRSEP)tnyprntf.c
 endif
 
-label.exe _label.exe: label.c $(KITTEN) $(TNYPRNTF)
+label.exe: label.c $(KITTEN) $(TNYPRNTF)
 	$(CC) $(CFLAGS)$@ $^ $(LDFLAGS)
+	-$(UPX) $@
+
+_label.exe: label.c $(TNYPRNTF)
+	$(CC) -DNOCATS $(CFLAGS)$@ $^ $(LDFLAGS)
 	-$(UPX) $@
 
 clean:
